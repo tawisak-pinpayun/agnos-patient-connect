@@ -1,0 +1,24 @@
+{
+  "name": "agnos-patient-connect",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build:shared": "npm run build --workspace @apc/shared",
+    "dev": "npm run build:shared && concurrently -n server,web -c cyan,magenta \"npm run dev --workspace @apc/server\" \"npm run dev --workspace @apc/web\"",
+    "dev:server": "npm run dev --workspace @apc/server",
+    "dev:web": "npm run dev --workspace @apc/web",
+    "build": "npm run build:shared && npm run build --workspace @apc/server && npm run build --workspace @apc/web",
+    "lint": "npm run lint --workspace @apc/web",
+    "typecheck": "npm run build:shared && npm run typecheck --workspace @apc/server && npm run typecheck --workspace @apc/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

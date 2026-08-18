@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: agnos-patient-connect-socket
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: .
+    buildCommand: npm install && npm run build:shared && npm run build --workspace @apc/server
+    startCommand: npm run start --workspace @apc/server
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: PORT
+        value: 4000
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB
+        value: patient-connect
+      - key: CORS_ORIGINS
+        sync: false
+      - key: IDLE_THRESHOLD_MS
+        value: 30000
+      - key: DRAFT_TTL_DAYS
+        value: 7
