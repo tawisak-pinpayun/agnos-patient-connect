@@ -43,7 +43,7 @@ export function toSummary(doc: SessionDoc): SessionSummary {
 }
 
 export function toSnapshot(doc: SessionDoc): SessionSnapshot {
-  return { ...toSummary(doc), data: doc.data };
+  return { ...toSummary(doc), data: doc.data, audit: doc.audit };
 }
 
 export async function joinSession(sessionId: string): Promise<SessionSnapshot> {
@@ -58,7 +58,7 @@ export async function getSnapshot(sessionId: string): Promise<SessionSnapshot | 
 
 export async function listSummaries(): Promise<SessionSummary[]> {
   const docs = await repo.listSessions();
-  return docs.map(toSummary);
+  return docs.map(toSummary).filter((summary) => summary.filledCount > 0);
 }
 
 export interface DraftUpdateResult {
@@ -70,6 +70,7 @@ export interface DraftUpdateResult {
 export async function updateDraft(
   sessionId: string,
   rawPatch: unknown,
+  source: 'patient' | 'staff' = 'patient',
 ): Promise<DraftUpdateResult> {
   const parsed = patientDraftSchema.safeParse(rawPatch);
   if (!parsed.success) throw new Error('INVALID_PATCH');
@@ -77,7 +78,7 @@ export async function updateDraft(
   const patch = parsed.data as PatientDataPatch;
   if (Object.keys(patch).length === 0) throw new Error('EMPTY_PATCH');
 
-  const doc = await repo.applyDraftPatch(sessionId, patch);
+  const doc = await repo.applyDraftPatch(sessionId, patch, source);
   if (!doc) throw new Error('SESSION_LOCKED');
 
   return {
@@ -109,8 +110,9 @@ export function validatePatientData(
 export async function submitDraft(
   sessionId: string,
   data: PatientData,
+  source: 'patient' | 'staff' = 'patient',
 ): Promise<SubmitResult> {
-  const doc = await repo.submitSession(sessionId, data);
+  const doc = await repo.submitSession(sessionId, data, source);
   return {
     data: doc.data,
     summary: toSummary(doc),
@@ -132,4 +134,8 @@ export async function refreshSummary(sessionId: string): Promise<SessionSummary 
 
 export async function touch(sessionId: string): Promise<void> {
   await repo.touchSession(sessionId);
+}
+
+export async function deleteSession(sessionId: string): Promise<void> {
+  await repo.deleteSession(sessionId);
 }

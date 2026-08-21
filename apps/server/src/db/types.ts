@@ -1,4 +1,4 @@
-import type { PatientData, SessionStatus } from '@apc/shared';
+import type { AuditEntry, PatientData, SessionStatus } from '@apc/shared';
 
 export interface SessionDoc {
   _id: string;
@@ -7,6 +7,7 @@ export interface SessionDoc {
   createdAt: Date;
   lastActivityAt: Date;
   submittedAt: Date | null;
+  audit: AuditEntry[];
 }
 
 export interface SubmissionDoc {

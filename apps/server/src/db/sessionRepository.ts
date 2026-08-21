@@ -1,5 +1,6 @@
 import {
   EMPTY_PATIENT_DATA,
+  type AuditEntry,
   type PatientData,
   type PatientDataPatch,
 } from '@apc/shared';
@@ -15,11 +16,14 @@ function newSessionDoc(sessionId: string): SessionDoc {
     createdAt: now,
     lastActivityAt: now,
     submittedAt: null,
+    audit: [],
   };
 }
 
 export async function findSession(sessionId: string): Promise<SessionDoc | null> {
-  return sessionsCollection().findOne({ _id: sessionId });
+  const doc = await sessionsCollection().findOne({ _id: sessionId });
+  if (!doc) return null;
+  return { ...doc, data: { ...EMPTY_PATIENT_DATA, ...doc.data }, audit: Array.isArray(doc.audit) ? doc.audit : [] };
 }
 
 export async function ensureSession(sessionId: string): Promise<SessionDoc> {
@@ -34,6 +38,7 @@ export async function ensureSession(sessionId: string): Promise<SessionDoc> {
 export async function applyDraftPatch(
   sessionId: string,
   patch: PatientDataPatch,
+  source: 'patient' | 'staff',
 ): Promise<SessionDoc | null> {
   const now = new Date();
   const setFields: Record<string, unknown> = { lastActivityAt: now };
@@ -42,14 +47,22 @@ export async function applyDraftPatch(
     setFields[`data.${key}`] = value;
   }
 
+  const auditEntry: AuditEntry = {
+    at: now.toISOString(),
+    source,
+    action: 'draft',
+  };
+
   const result = await sessionsCollection().findOneAndUpdate(
     { _id: sessionId, submittedAt: null },
     {
       $set: setFields,
+      $push: { audit: auditEntry },
       $setOnInsert: {
         createdAt: now,
         status: 'filling',
         submittedAt: null,
+        audit: [],
       },
     },
     { returnDocument: 'after', upsert: true },
@@ -59,6 +72,7 @@ export async function applyDraftPatch(
 
   // ให้แน่ใจว่า field ที่ยังไม่เคยถูกเซ็ตมีค่าเริ่มต้นครบ
   result.data = { ...EMPTY_PATIENT_DATA, ...result.data };
+  result.audit = Array.isArray(result.audit) ? result.audit : [];
   if (result.status !== 'submitted') {
     await sessionsCollection().updateOne(
       { _id: sessionId, submittedAt: null },
@@ -88,10 +102,17 @@ export async function markIdle(sessionIds: string[]): Promise<void> {
 export async function submitSession(
   sessionId: string,
   data: PatientData,
+  source: 'patient' | 'staff',
 ): Promise<SessionDoc> {
   const submittedAt = new Date();
 
   await submissionsCollection().insertOne({ sessionId, data, submittedAt });
+
+  const auditEntry: AuditEntry = {
+    at: submittedAt.toISOString(),
+    source,
+    action: 'submit',
+  };
 
   const result = await sessionsCollection().findOneAndUpdate(
     { _id: sessionId },
@@ -102,12 +123,15 @@ export async function submitSession(
         submittedAt,
         lastActivityAt: submittedAt,
       },
-      $setOnInsert: { createdAt: submittedAt },
+      $push: { audit: auditEntry },
+      $setOnInsert: { createdAt: submittedAt, audit: [] },
     },
     { returnDocument: 'after', upsert: true },
   );
 
   if (!result) throw new Error(`Failed to persist submission for session ${sessionId}`);
+  result.data = { ...EMPTY_PATIENT_DATA, ...result.data };
+  result.audit = Array.isArray(result.audit) ? result.audit : [];
   return result;
 }
 
@@ -119,16 +143,29 @@ export async function listSessions(limit = 100): Promise<SessionDoc[]> {
   return docs.map((doc) => ({
     ...doc,
     data: { ...EMPTY_PATIENT_DATA, ...doc.data },
+    audit: Array.isArray(doc.audit) ? doc.audit : [],
   }));
 }
 
 export async function findStaleSessions(thresholdMs: number): Promise<SessionDoc[]> {
   const cutoff = new Date(Date.now() - thresholdMs);
-  return sessionsCollection()
+  const docs = await sessionsCollection()
     .find({
       submittedAt: null,
       status: 'filling',
       lastActivityAt: { $lt: cutoff },
     })
     .toArray();
+  return docs.map((doc) => ({
+    ...doc,
+    data: { ...EMPTY_PATIENT_DATA, ...doc.data },
+    audit: Array.isArray(doc.audit) ? doc.audit : [],
+  }));
+}
+
+export async function deleteSession(sessionId: string): Promise<void> {
+  await Promise.all([
+    sessionsCollection().deleteOne({ _id: sessionId }),
+    submissionsCollection().deleteMany({ sessionId }),
+  ]);
 }

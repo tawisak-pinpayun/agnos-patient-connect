@@ -2,7 +2,6 @@ import type {
   Gender,
   Nationality,
   PreferredLanguage,
-  Religion,
 } from './constants';
 
 export type SessionStatus = 'filling' | 'submitted' | 'idle';
@@ -13,14 +12,16 @@ export interface PatientData {
   lastName: string;
   dateOfBirth: string;
   gender: Gender | '';
+  genderOther: string;
   phone: string;
   email: string;
   address: string;
   preferredLanguage: PreferredLanguage | '';
+  preferredLanguageOther: string;
   nationality: Nationality | '';
+  nationalityOther: string;
   emergencyContactName: string;
   emergencyContactRelation: string;
-  religion: Religion | '';
 }
 
 export type PatientDataPatch = Partial<PatientData>;
@@ -39,8 +40,15 @@ export interface SessionSummary {
   connected: boolean;
 }
 
+export interface AuditEntry {
+  at: string;
+  source: 'patient' | 'staff';
+  action: 'draft' | 'submit' | 'delete';
+}
+
 export interface SessionSnapshot extends SessionSummary {
   data: PatientData;
+  audit: AuditEntry[];
 }
 
 export interface FieldError {
@@ -54,14 +62,16 @@ export const EMPTY_PATIENT_DATA: PatientData = {
   lastName: '',
   dateOfBirth: '',
   gender: '',
+  genderOther: '',
   phone: '',
   email: '',
   address: '',
   preferredLanguage: '',
+  preferredLanguageOther: '',
   nationality: '',
+  nationalityOther: '',
   emergencyContactName: '',
   emergencyContactRelation: '',
-  religion: '',
 };
 
 export const PATIENT_FIELDS = Object.keys(EMPTY_PATIENT_DATA) as PatientField[];
