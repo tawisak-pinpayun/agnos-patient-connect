@@ -50,7 +50,7 @@ git push -u origin main
 ใน Render Dashboard → tab **Environment** เติม:
 
 ```
-MONGODB_URI=mongodb://root:tawisak123password123@89.116.121.17:27017/patient-connect?authSource=admin
+MONGODB_URI=mongodb
 MONGODB_DB=patient-connect
 CORS_ORIGINS=https://agnos-patient-connect.vercel.app   ← ใช้ URL Vercel จริงของคุณ
 IDLE_THRESHOLD_MS=30000
