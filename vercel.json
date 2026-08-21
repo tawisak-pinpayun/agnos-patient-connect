@@ -1,6 +1,1 @@
-{
-  "buildCommand": "npm run build:shared && npm run build --workspace @apc/web",
-  "installCommand": "npm install",
-  "outputDirectory": "apps/web/.next",
-  "framework": "nextjs"
-}
+{}
