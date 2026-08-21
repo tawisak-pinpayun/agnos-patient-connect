@@ -19,7 +19,7 @@ function SyncStatus({ state }: { state: SyncState }) {
 
   if (state === 'saving') {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
+      <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
         <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
         {t('patient.saving')}
       </span>
@@ -28,7 +28,7 @@ function SyncStatus({ state }: { state: SyncState }) {
 
   if (state === 'saved') {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600">
+      <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
         <Check className="h-3.5 w-3.5" aria-hidden />
         {t('patient.saved')}
       </span>
@@ -37,7 +37,7 @@ function SyncStatus({ state }: { state: SyncState }) {
 
   if (state === 'error') {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-rose-600">
+      <span className="inline-flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400">
         <TriangleAlert className="h-3.5 w-3.5" aria-hidden />
         {t('connection.disconnected')}
       </span>
@@ -57,7 +57,7 @@ export function SubmitBar({
   const { t } = useTranslation();
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur lg:static lg:rounded-2xl lg:border lg:px-6 lg:py-4 lg:shadow-sm">
+    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 lg:static lg:rounded-2xl lg:border lg:px-6 lg:py-4 lg:shadow-sm">
       <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <ProgressBar
@@ -67,7 +67,7 @@ export function SubmitBar({
           />
           <div className="mt-1 min-h-4" aria-live="polite">
             {errorKey ? (
-              <span className="text-xs font-medium text-rose-600">{t(errorKey)}</span>
+              <span className="text-xs font-medium text-rose-600 dark:text-rose-400">{t(errorKey)}</span>
             ) : (
               <SyncStatus state={syncState} />
             )}

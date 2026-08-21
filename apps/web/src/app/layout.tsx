@@ -5,6 +5,7 @@ import './globals.css';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { LanguageProvider } from '@/providers/LanguageProvider';
 import { SocketProvider } from '@/providers/SocketProvider';
+import { ThemeProvider } from '@/providers/ThemeProvider';
 
 const notoSansThai = Noto_Sans_Thai({
   subsets: ['thai', 'latin'],
@@ -26,16 +27,18 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="th" className={notoSansThai.variable}>
+    <html lang="th" className={notoSansThai.variable} suppressHydrationWarning>
       <body className="min-h-dvh font-sans">
-        <LanguageProvider>
-          <SocketProvider>
-            <AppHeader />
-            <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-              {children}
-            </main>
-          </SocketProvider>
-        </LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <SocketProvider>
+              <AppHeader />
+              <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                {children}
+              </main>
+            </SocketProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

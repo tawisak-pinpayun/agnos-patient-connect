@@ -12,14 +12,14 @@ export function ProgressBar({ value, total, label, className }: ProgressBarProps
 
   return (
     <div className={className}>
-      <div className="mb-1 flex items-center justify-between text-xs text-slate-500">
+      <div className="mb-1 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
         <span>{label}</span>
-        <span className="font-medium text-slate-700">
+        <span className="font-medium text-slate-700 dark:text-slate-200">
           {value}/{total} ({percent}%)
         </span>
       </div>
       <div
-        className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200"
+        className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
         role="progressbar"
         aria-valuenow={percent}
         aria-valuemin={0}

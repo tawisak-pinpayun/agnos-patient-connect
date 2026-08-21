@@ -10,7 +10,7 @@ export function LanguageToggle() {
 
   return (
     <div
-      className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white p-1"
+      className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-800"
       role="group"
       aria-label="Language"
     >
@@ -26,7 +26,7 @@ export function LanguageToggle() {
             'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-500',
             locale === value
               ? 'bg-brand-600 text-white'
-              : 'text-slate-600 hover:bg-slate-100',
+              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700',
           )}
         >
           {LOCALE_LABELS[value]}
