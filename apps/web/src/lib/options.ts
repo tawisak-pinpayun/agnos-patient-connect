@@ -2,7 +2,6 @@ import {
   GENDER_VALUES,
   NATIONALITY_VALUES,
   PREFERRED_LANGUAGE_VALUES,
-  RELIGION_VALUES,
 } from '@apc/shared';
 
 export interface SelectOption {
@@ -19,11 +18,6 @@ export const preferredLanguageOptions: SelectOption[] = PREFERRED_LANGUAGE_VALUE
   (value) => ({ value, labelKey: `language.${value}` }),
 );
 
-export const religionOptions: SelectOption[] = RELIGION_VALUES.map((value) => ({
-  value,
-  labelKey: `religion.${value}`,
-}));
-
 export const nationalityOptions: SelectOption[] = NATIONALITY_VALUES.map((value) => ({
   value,
   labelKey: `nationality.${value}`,
@@ -32,7 +26,6 @@ export const nationalityOptions: SelectOption[] = NATIONALITY_VALUES.map((value)
 const OPTION_LOOKUP: Record<string, SelectOption[]> = {
   gender: genderOptions,
   preferredLanguage: preferredLanguageOptions,
-  religion: religionOptions,
   nationality: nationalityOptions,
 };
 
