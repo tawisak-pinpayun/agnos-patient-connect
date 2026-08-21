@@ -6,9 +6,12 @@ import type { SessionStatus } from '@apc/shared';
 import { useTranslation } from '@/hooks/useTranslation';
 
 const styles: Record<SessionStatus, string> = {
-  filling: 'bg-brand-50 text-brand-700 border-brand-200',
-  submitted: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  idle: 'bg-slate-100 text-slate-600 border-slate-200',
+  filling:
+    'bg-brand-50 text-brand-700 border-brand-200 dark:bg-brand-900/30 dark:text-brand-300 dark:border-brand-800',
+  submitted:
+    'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
+  idle:
+    'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
 };
 
 const icons: Record<SessionStatus, typeof PencilLine> = {

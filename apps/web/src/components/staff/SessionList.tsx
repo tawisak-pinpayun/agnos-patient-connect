@@ -9,21 +9,27 @@ interface SessionListProps {
   sessions: SessionSummary[];
   activeSessionId?: string | null;
   onSelect: (sessionId: string) => void;
+  onDelete: (sessionId: string) => void;
+  emptyKey?: string;
+  emptyHintKey?: string;
 }
 
 export function SessionList({
   sessions,
   activeSessionId,
   onSelect,
+  onDelete,
+  emptyKey = 'staff.empty',
+  emptyHintKey = 'staff.emptyHint',
 }: SessionListProps) {
   const { t } = useTranslation();
 
   if (sessions.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center">
+      <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-900/50">
         <Users className="h-6 w-6 text-slate-300" aria-hidden />
-        <p className="text-sm font-medium text-slate-600">{t('staff.empty')}</p>
-        <p className="text-xs text-slate-400">{t('staff.emptyHint')}</p>
+        <p className="text-sm font-medium text-slate-600 dark:text-slate-300">{t(emptyKey)}</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500">{t(emptyHintKey)}</p>
       </div>
     );
   }
@@ -36,6 +42,7 @@ export function SessionList({
             summary={summary}
             active={summary.sessionId === activeSessionId}
             onSelect={onSelect}
+            onDelete={onDelete}
           />
         </li>
       ))}
