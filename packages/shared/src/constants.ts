@@ -1,18 +1,8 @@
-export const GENDER_VALUES = ['male', 'female', 'other', 'undisclosed'] as const;
+export const GENDER_VALUES = ['male', 'female'] as const;
 export type Gender = (typeof GENDER_VALUES)[number];
 
 export const PREFERRED_LANGUAGE_VALUES = ['th', 'en', 'other'] as const;
 export type PreferredLanguage = (typeof PREFERRED_LANGUAGE_VALUES)[number];
-
-export const RELIGION_VALUES = [
-  'buddhism',
-  'christianity',
-  'islam',
-  'hinduism',
-  'none',
-  'other',
-] as const;
-export type Religion = (typeof RELIGION_VALUES)[number];
 
 export const NATIONALITY_VALUES = [
   'TH',

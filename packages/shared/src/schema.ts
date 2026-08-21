@@ -3,7 +3,6 @@ import {
   GENDER_VALUES,
   NATIONALITY_VALUES,
   PREFERRED_LANGUAGE_VALUES,
-  RELIGION_VALUES,
 } from './constants';
 
 /**
@@ -24,7 +23,7 @@ export const ERROR_KEYS = {
   addressTooLong: 'error.addressTooLong',
   invalidLanguage: 'error.invalidLanguage',
   invalidNationality: 'error.invalidNationality',
-  invalidReligion: 'error.invalidReligion',
+  specifyOther: 'error.specifyOther',
   emergencyIncomplete: 'error.emergencyIncomplete',
 } as const;
 
@@ -89,23 +88,36 @@ export const patientSchema = z
     gender: z.enum(GENDER_VALUES, {
       errorMap: () => ({ message: ERROR_KEYS.required }),
     }),
+    genderOther: optionalText(100),
     phone,
     email,
     address,
     preferredLanguage: z.enum(PREFERRED_LANGUAGE_VALUES, {
       errorMap: () => ({ message: ERROR_KEYS.required }),
     }),
+    preferredLanguageOther: optionalText(100),
     nationality: z.enum(NATIONALITY_VALUES, {
       errorMap: () => ({ message: ERROR_KEYS.required }),
     }),
+    nationalityOther: optionalText(100),
     emergencyContactName: optionalText(100),
     emergencyContactRelation: optionalText(60),
-    religion: z
-      .union([z.enum(RELIGION_VALUES), z.literal('')])
-      .optional()
-      .default(''),
   })
   .superRefine((value, ctx) => {
+    if (value.nationality === 'OTHER' && value.nationalityOther.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: ERROR_KEYS.specifyOther,
+        path: ['nationalityOther'],
+      });
+    }
+    if (value.preferredLanguage === 'other' && value.preferredLanguageOther.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: ERROR_KEYS.specifyOther,
+        path: ['preferredLanguageOther'],
+      });
+    }
     const hasName = value.emergencyContactName.trim().length > 0;
     const hasRelation = value.emergencyContactRelation.trim().length > 0;
     if (hasName !== hasRelation) {
@@ -128,14 +140,16 @@ export const patientDraftSchema = z
     lastName: z.string().max(100),
     dateOfBirth: z.string().max(30),
     gender: z.union([z.enum(GENDER_VALUES), z.literal('')]),
+    genderOther: z.string().max(100),
     phone: z.string().max(30),
     email: z.string().max(254),
     address: z.string().max(300),
     preferredLanguage: z.union([z.enum(PREFERRED_LANGUAGE_VALUES), z.literal('')]),
+    preferredLanguageOther: z.string().max(100),
     nationality: z.union([z.enum(NATIONALITY_VALUES), z.literal('')]),
+    nationalityOther: z.string().max(100),
     emergencyContactName: z.string().max(100),
     emergencyContactRelation: z.string().max(60),
-    religion: z.union([z.enum(RELIGION_VALUES), z.literal('')]),
   })
   .partial();
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   EMPTY_PATIENT_DATA,
@@ -20,11 +20,11 @@ import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { usePatientDraftSync } from '@/hooks/usePatientDraftSync';
 import { useTranslation } from '@/hooks/useTranslation';
+import { calculateAge } from '@/lib/format';
 import {
   genderOptions,
   nationalityOptions,
   preferredLanguageOptions,
-  religionOptions,
   type SelectOption,
 } from '@/lib/options';
 
@@ -74,6 +74,7 @@ export function PatientForm({ sessionId }: PatientFormProps) {
   }, [pushPatch, watch]);
 
   const values = watch();
+  const age = useMemo(() => calculateAge(values.dateOfBirth), [values.dateOfBirth]);
   const filledCount = countFilledFields(values);
 
   const onSubmit = handleSubmit(async (data) => {
@@ -107,12 +108,12 @@ export function PatientForm({ sessionId }: PatientFormProps) {
   );
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-4 pb-28 lg:pb-4">
+    <form onSubmit={onSubmit} noValidate autoComplete="off" className="space-y-4 pb-28 lg:pb-4">
       <FormSection titleKey="patient.section.personal">
         <FormField id="firstName" labelKey="field.firstName" required error={errors.firstName?.message}>
           <Input
             id="firstName"
-            autoComplete="given-name"
+            autoComplete="off"
             aria-invalid={Boolean(errors.firstName)}
             {...register('firstName')}
           />
@@ -121,7 +122,7 @@ export function PatientForm({ sessionId }: PatientFormProps) {
         <FormField id="middleName" labelKey="field.middleName" error={errors.middleName?.message}>
           <Input
             id="middleName"
-            autoComplete="additional-name"
+            autoComplete="off"
             aria-invalid={Boolean(errors.middleName)}
             {...register('middleName')}
           />
@@ -130,13 +131,13 @@ export function PatientForm({ sessionId }: PatientFormProps) {
         <FormField id="lastName" labelKey="field.lastName" required error={errors.lastName?.message}>
           <Input
             id="lastName"
-            autoComplete="family-name"
+            autoComplete="off"
             aria-invalid={Boolean(errors.lastName)}
             {...register('lastName')}
           />
         </FormField>
 
-        <FormField id="dateOfBirth" labelKey="field.dateOfBirth" required error={errors.dateOfBirth?.message}>
+        <FormField id="dateOfBirth" labelKey="field.dateOfBirth" required error={errors.dateOfBirth?.message} hint={age ? t('field.age', { value: age }) : undefined}>
           <Input
             id="dateOfBirth"
             type="date"
@@ -161,6 +162,18 @@ export function PatientForm({ sessionId }: PatientFormProps) {
             {renderOptions(nationalityOptions)}
           </Select>
         </FormField>
+
+        {values.nationality === 'OTHER' && (
+          <FormField
+            id="nationalityOther"
+            labelKey="field.nationalityOther"
+            required
+            error={errors.nationalityOther?.message}
+          >
+            <Input id="nationalityOther" aria-invalid={Boolean(errors.nationalityOther)} {...register('nationalityOther')} />
+          </FormField>
+        )}
+
       </FormSection>
 
       <FormSection titleKey="patient.section.contact">
@@ -175,7 +188,7 @@ export function PatientForm({ sessionId }: PatientFormProps) {
             id="phone"
             type="tel"
             inputMode="tel"
-            autoComplete="tel"
+            autoComplete="off"
             aria-invalid={Boolean(errors.phone)}
             {...register('phone')}
           />
@@ -186,7 +199,7 @@ export function PatientForm({ sessionId }: PatientFormProps) {
             id="email"
             type="email"
             inputMode="email"
-            autoComplete="email"
+            autoComplete="off"
             aria-invalid={Boolean(errors.email)}
             {...register('email')}
           />
@@ -201,7 +214,7 @@ export function PatientForm({ sessionId }: PatientFormProps) {
         >
           <Textarea
             id="address"
-            autoComplete="street-address"
+            autoComplete="off"
             placeholder={t('field.addressPlaceholder')}
             aria-invalid={Boolean(errors.address)}
             {...register('address')}
@@ -222,6 +235,17 @@ export function PatientForm({ sessionId }: PatientFormProps) {
             {renderOptions(preferredLanguageOptions)}
           </Select>
         </FormField>
+
+        {values.preferredLanguage === 'other' && (
+          <FormField
+            id="preferredLanguageOther"
+            labelKey="field.preferredLanguageOther"
+            required
+            error={errors.preferredLanguageOther?.message}
+          >
+            <Input id="preferredLanguageOther" aria-invalid={Boolean(errors.preferredLanguageOther)} {...register('preferredLanguageOther')} />
+          </FormField>
+        )}
       </FormSection>
 
       <FormSection titleKey="patient.section.extra">
@@ -249,15 +273,6 @@ export function PatientForm({ sessionId }: PatientFormProps) {
           />
         </FormField>
 
-        <FormField id="religion" labelKey="field.religion" error={errors.religion?.message}>
-          <Select
-            id="religion"
-            aria-invalid={Boolean(errors.religion)}
-            {...register('religion')}
-          >
-            {renderOptions(religionOptions)}
-          </Select>
-        </FormField>
       </FormSection>
 
       <SubmitBar
