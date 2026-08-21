@@ -20,6 +20,8 @@ export const SOCKET_EVENTS = {
   draftUpdated: 'draft:updated',
   draftSubmit: 'draft:submit',
   draftSubmitted: 'draft:submitted',
+  sessionDelete: 'session:delete',
+  sessionDeleted: 'session:deleted',
 } as const;
 
 export type SocketRole = 'patient' | 'staff';
@@ -44,6 +46,7 @@ export interface ServerToClientEvents {
     sessionId: string;
     patch: PatientDataPatch;
     lastActivityAt: string;
+    source: 'patient' | 'staff';
   }) => void;
   [SOCKET_EVENTS.sessionSummary]: (summary: SessionSummary) => void;
   [SOCKET_EVENTS.staffSnapshot]: (summaries: SessionSummary[]) => void;
@@ -57,7 +60,9 @@ export interface ServerToClientEvents {
     sessionId: string;
     data: PatientData;
     submittedAt: string;
+    source: 'patient' | 'staff';
   }) => void;
+  [SOCKET_EVENTS.sessionDeleted]: (sessionId: string) => void;
 }
 
 /** event ที่ client ส่งมาหา server */
@@ -73,6 +78,10 @@ export interface ClientToServerEvents {
   [SOCKET_EVENTS.draftSubmit]: (
     payload: { sessionId: string; data: PatientData },
     ack?: (res: Ack<{ submittedAt: string }>) => void,
+  ) => void;
+  [SOCKET_EVENTS.sessionDelete]: (
+    sessionId: string,
+    ack?: (res: Ack) => void,
   ) => void;
   [SOCKET_EVENTS.staffJoin]: (ack?: (res: Ack<SessionSummary[]>) => void) => void;
   [SOCKET_EVENTS.sessionWatch]: (

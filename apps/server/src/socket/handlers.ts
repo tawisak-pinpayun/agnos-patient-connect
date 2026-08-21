@@ -58,12 +58,14 @@ export function registerSocketHandlers(io: AppServer): void {
       }
 
       try {
-        const result = await service.updateDraft(sessionId, payload.patch);
+        const source = socket.rooms.has(ROOMS.staffLobby) ? 'staff' : 'patient';
+        const result = await service.updateDraft(sessionId, payload.patch, source);
 
         socket.to(ROOMS.session(sessionId)).emit(SOCKET_EVENTS.draftUpdated, {
           sessionId,
           patch: result.patch,
           lastActivityAt: result.lastActivityAt,
+          source,
         });
         io.to(ROOMS.staffLobby).emit(SOCKET_EVENTS.sessionSummary, result.summary);
         ack?.({ ok: true });
@@ -90,12 +92,14 @@ export function registerSocketHandlers(io: AppServer): void {
       }
 
       try {
-        const result = await service.submitDraft(sessionId, validation.data);
+        const source = socket.rooms.has(ROOMS.staffLobby) ? 'staff' : 'patient';
+        const result = await service.submitDraft(sessionId, validation.data, source);
 
         io.to(ROOMS.session(sessionId)).emit(SOCKET_EVENTS.draftSubmitted, {
           sessionId,
           data: result.data,
           submittedAt: result.submittedAt,
+          source,
         });
         io.to(ROOMS.staffLobby).emit(SOCKET_EVENTS.sessionSummary, result.summary);
         ack?.({ ok: true, data: { submittedAt: result.submittedAt } });
@@ -141,6 +145,21 @@ export function registerSocketHandlers(io: AppServer): void {
     socket.on(SOCKET_EVENTS.sessionUnwatch, (sessionId) => {
       if (!service.isValidSessionId(sessionId)) return;
       void socket.leave(ROOMS.session(sessionId));
+    });
+
+    socket.on(SOCKET_EVENTS.sessionDelete, async (sessionId, ack) => {
+      if (!service.isValidSessionId(sessionId)) {
+        ack?.({ ok: false, message: 'INVALID_SESSION_ID' });
+        return;
+      }
+      try {
+        await service.deleteSession(sessionId);
+        io.to(ROOMS.staffLobby).emit(SOCKET_EVENTS.sessionDeleted, sessionId);
+        ack?.({ ok: true });
+      } catch (error) {
+        console.error('[socket] session:delete failed', error);
+        ack?.({ ok: false, message: 'DELETE_FAILED' });
+      }
     });
 
     socket.on('disconnect', async () => {

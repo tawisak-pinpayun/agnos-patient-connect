@@ -41,6 +41,7 @@ export function useSessionSubscription(sessionId: string | null) {
       sessionId: string;
       patch: PatientDataPatch;
       lastActivityAt: string;
+      source: 'patient' | 'staff';
     }) => {
       if (payload.sessionId !== sessionId) return;
 
@@ -53,6 +54,10 @@ export function useSessionSubscription(sessionId: string | null) {
               lastActivityAt: payload.lastActivityAt,
               status: prev.status === 'submitted' ? 'submitted' : 'filling',
               connected: true,
+              audit: [
+                ...prev.audit,
+                { at: payload.lastActivityAt, source: payload.source, action: 'draft' },
+              ],
             }
           : prev,
       );
@@ -81,6 +86,7 @@ export function useSessionSubscription(sessionId: string | null) {
       sessionId: string;
       data: SessionSnapshot['data'];
       submittedAt: string;
+      source: 'patient' | 'staff';
     }) => {
       if (payload.sessionId !== sessionId) return;
       setSnapshot((prev) =>
@@ -91,6 +97,10 @@ export function useSessionSubscription(sessionId: string | null) {
               status: 'submitted',
               submittedAt: payload.submittedAt,
               lastActivityAt: payload.submittedAt,
+              audit: [
+                ...prev.audit,
+                { at: payload.submittedAt, source: payload.source, action: 'submit' },
+              ],
             }
           : prev,
       );
